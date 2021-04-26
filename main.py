@@ -1,4 +1,5 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request
+import telegram
 import functions, messages, config
 
 from flask_sslify import SSLify
@@ -6,38 +7,29 @@ from flask_sslify import SSLify
 app = Flask(__name__)
 sslify = SSLify(app)
 
-URL = f'https://api.telegram.org/bot{config.token}/'
+bot = telegram.Bot(config.token)
 
-@app.route(f'/{config.token}', methods=['POST', 'GET'])
+@app.route(f'/{config.token}', methods=['POST'])
 def index():
-    if request.method == 'POST':
-        try:
-            r = request.get_json()
-            chat_id = r['message']['chat']['id']
-            chat_type = r['message']['chat']['type']
+    try:
+        update = telegram.Update.de_json(request.get_json(force=True), bot)
+        chat_id = update.message.chat.id
+        chat_type = update.message.chat.type
 
-            if 'text' in r['message']:
-                message = r['message']['text']
-                for symbol in messages.forbidden:
-                    if symbol in message: message = message.replace(symbol, "").lower()
-                message_words = message.split(' ')
-            else:
-                message = ' '
+        msg_text = update.message.text.encode('utf-8').decode()
 
-            if 'username' in r['message']['from']:
-                username = r['message']['from']['username']
-            else:
-                username = 'unknown'
+        for symbol in messages.forbidden:
+            if symbol in msg_text: msg_text = msg_text.replace(symbol, "").lower()
+        msg_words = msg_text.split(' ')
 
-            functions.process_commands(message, chat_id, username, chat_type)
-            print(message, chat_id, username, message_words, chat_type)
-            functions.process_message(message, chat_id, username, message_words, chat_type)
+        username = update.message.from_user.username if update.message.from_user.username else 'unknown'
 
-        except:
-            pass
-
-        return jsonify(r)
-    return '<h1>Trybot is working!</h1>'
+        print(msg_text, chat_id, username, msg_words, chat_type)
+        functions.process_commands(msg_text, chat_id, username, chat_type)
+        functions.process_message(msg_text, chat_id, username, msg_words, chat_type)
+    except:
+        pass
+    return 'A'
 
 @app.route(f"/{config.key}", methods=['POST'])
 def notify():
@@ -47,7 +39,7 @@ def notify():
         functions.notify_followers(message)
     except:
         pass
-    return 'A'
+    return 'B'
 
 if __name__ == '__main__':
     app.run(debug=True)

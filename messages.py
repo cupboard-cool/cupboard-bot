@@ -88,3 +88,5 @@ nontarget_trigger_message_dictionaries_list = (sneeze_message_dictionary)
 
 name_triggers = ('шкафовчянин', 'шкафавчянин', 'шкафовцянин', 'шкафавцянин')
 forbidden = (',','.','?','!',':',';','-','—')
+
+exceptions_list = ['абижаца на антошку']
