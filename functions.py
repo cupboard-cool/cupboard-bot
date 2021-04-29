@@ -1,66 +1,91 @@
-from random import choice, randrange
+from random import choice, random
 import difflib
-import messages
 import json
+
+import messages
+import config
 
 from main import bot
 
 
 
 def notify_followers(message):
-    with open('bot/followers.json') as followers_data:
+    with open(config.followers_data_path) as followers_data:
         followers = json.load(followers_data)['followers']
         for follower in followers:
             bot.sendMessage(follower['chat_id'], message)
 
 
 
-def process_commands(message, chat_id, username, chat_type):
-    if '/try' in message:
-        s = message.split(' ', 1)
-        action = s[1]
-        for exception in messages.exceptions_list:
-            if action == exception:
-                message_respone = "У {0}, получилось {1}".format(username, action)
-                break
+def process_command(message, chat_id, username, chat_type):
+    command = message.split(' ', 1)[0]
+    arg = message.split(' ', 1) if len(message.split(' ')) > 1 else None
+
+    if command == '/try':
+        if arg in messages.exceptions_list:
+            message_respone = "У {0}, получилось {1}".format(username, arg)
+        elif random() > 0.5:
+            message_respone = "У {0}, получилось {1}".format(username, arg)
         else:
-            randnum = randrange(1,100,1)
-            if randnum > 50:
-                message_respone = "У {0}, получилось {1}".format(username, action)
-            else:
-                message_respone = "У {0}, не получилось {1}".format(username, action)
+            message_respone = "У {0}, не получилось {1}".format(username, arg)
+
         bot.sendMessage(chat_id, message_respone)
 
     if chat_type == 'private':
+        if command == '/follow':
+                data = None
 
-        if message == '/follow':
-                with open('bot/followers.json') as followers_data:
-                    data = json.load(followers_data)
-                for follower in data['followers']:
-                    if follower['chat_id'] == chat_id:
-                        message_respone = "Асыбка! Вы узе падписаны на апавесенние."
-                        break
-                else:
-                    data["followers"].append({
-                        'chat_id':  chat_id
-                    })
-                    with open('bot/followers.json', 'w') as followers_data:
-                        json.dump(data, followers_data)
-                    message_respone = "Вы успесна падписались на апавесенние."
+                try:
+                    with open(config.followers_data_path) as followers_data:
+                        data = json.load(followers_data)
+
+                    for follower in data['followers']:
+                        if follower['chat_id'] == chat_id:
+                            message_respone = "Асыбка! Вы узе падписаны на апавесенние."
+                            break
+                    else:
+                        data["followers"].append({'chat_id': chat_id})
+
+                        with open(config.followers_data_path, 'w') as followers_data:
+                            json.dump(data, followers_data)
+
+                        message_respone = "Вы успесна падписались на апавесенние."
+                except:
+                    pass
+
+                if data == None:
+                    with open(config.followers_data_path, 'w') as followers_data:
+                        json.dump({"followers": [{'chat_id': chat_id}]}, followers_data)
+                        message_respone = "Вы успесна падписались на апавесенние."
+
                 bot.sendMessage(chat_id, message_respone)
 
-        if message == '/unfollow':
-            with open('bot/followers.json') as followers_data:
-                data = json.load(followers_data)
-            for follower in data['followers']:
-                if follower['chat_id'] == chat_id:
-                    data['followers'].remove({'chat_id': chat_id})
-                    with open('bot/followers.json', 'w') as followers_data:
-                        json.dump(data, followers_data)
-                    message_respone = "Вы успесна атписались ат апавесенния."
-                    break
-            else:
-                message_respone = "Асыбка! Вы исё не падписаны на апавесенние."
+        if command == '/unfollow':
+            data = None
+
+            try:
+                with open(config.followers_data_path) as followers_data:
+                    data = json.load(followers_data)
+
+                for follower in data['followers']:
+                    if follower['chat_id'] == chat_id:
+                        data['followers'].remove({'chat_id': chat_id})
+
+                        with open(config.followers_data_path, 'w') as followers_data:
+                            json.dump(data, followers_data)
+
+                        message_respone = "Вы успесна атписались ат апавесенния."
+                        break
+                else:
+                    message_respone = "Асыбка! Вы исё не падписаны на апавесенние."
+            except:
+                pass
+
+            if data == None:
+                with open(config.followers_data_path, 'w') as followers_data:
+                    json.dump({"followers": []}, followers_data)
+                    message_respone = "Асыбка! Вы исё не падписаны на апавесенние."
+
             bot.sendMessage(chat_id, message_respone)
 
 

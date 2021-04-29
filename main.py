@@ -1,6 +1,9 @@
 from flask import Flask, request
 import telegram
-import functions, messages, config
+
+import functions
+import messages
+import config
 
 from flask_sslify import SSLify
 
@@ -25,7 +28,7 @@ def index():
         username = update.message.from_user.username if update.message.from_user.username else 'unknown'
 
         print(msg_text, chat_id, username, msg_words, chat_type)
-        functions.process_commands(msg_text, chat_id, username, chat_type)
+        functions.process_command(msg_text, chat_id, username, chat_type)
         functions.process_message(msg_text, chat_id, username, msg_words, chat_type)
     except:
         pass
