@@ -83,7 +83,7 @@ sneeze_message_dictionary = {
          'Будь здалоф', 'Будь здороф!', 'Будь здароф :3')
 }
 
-nontarget_trigger_message_dictionaries_list = (sneeze_message_dictionary)
+nontarget_trigger_message_dictionaries_list = (sneeze_message_dictionary, sneeze_message_dictionary)
 
 
 name_triggers = ('шкафовчянин', 'шкафавчянин', 'шкафовцянин', 'шкафавцянин')
