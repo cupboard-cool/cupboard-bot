@@ -102,7 +102,7 @@ def process_message(message, chat_id, username, message_words, chat_type):
             else:
                 name_trigger_matches = [name_trigger for name_trigger in messages.name_triggers if name_trigger in message_words]
                 close_name_trigger_matches = [get_close_matches(name_trigger, message_words) for name_trigger in messages.name_triggers if get_close_matches(name_trigger, message_words)]
-                print(name_trigger_matches, close_name_trigger_matches)
+                
                 if name_trigger_matches or close_name_trigger_matches:
                     bot.send_message(chat_id, choice(trigger_message_dictionary['respone_message_array']).format(username))
                     break
