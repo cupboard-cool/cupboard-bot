@@ -4,7 +4,7 @@ import schedule
 
 import functions
 import messages
-import config
+from config import bot, key, token
 import gift_lab
 
 from flask_sslify import SSLify
@@ -12,11 +12,9 @@ from flask_sslify import SSLify
 app = Flask(__name__)
 sslify = SSLify(app)
 
-bot = telegram.Bot(config.token)
-
 schedule.every().day.at("06:00", "utc").do(gift_lab.check_birthday("%Y-%m-%d", "cupboard_birthdays.json"))
 
-@app.route(f'/{config.token}', methods=['POST'])
+@app.route(f'/{token}', methods=['POST'])
 def index():
     try:
         update = telegram.Update.de_json(request.get_json(force=True), bot)
@@ -38,7 +36,7 @@ def index():
         pass
     return 'A'
 
-@app.route(f"/{config.key}", methods=['POST'])
+@app.route(f"/{key}", methods=['POST'])
 def notify():
     try:
         r = request.get_json()

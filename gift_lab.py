@@ -1,5 +1,6 @@
 from datetime import datetime, UTC, timedelta
 import json
+from config import bot, cupboard_chat_id, gift_lab_chat_id
 
 
 def check_birthday(date_format: str, birthdays_file: str) -> None:
@@ -24,7 +25,15 @@ def check_birthday(date_format: str, birthdays_file: str) -> None:
 
 
 def congratulate(id: str) -> None:
-    raise NotImplementedError
+    username = bot.get_chat(id).username
+
+    gift_lab_message = f"У {username} сегодня день рождения, не забудьте отправить подарки!"
+    bot.send_message(gift_lab_chat_id, gift_lab_message)
+
+    cupboard_message = f"С днём рождения, {username}!"
+    cupboard_emoji = u"\ue34b"
+    bot.send_message(cupboard_chat_id, cupboard_message)
+    bot.send_message(cupboard_chat_id, cupboard_emoji)
 
 
 def ban(id: str) -> None:
