@@ -1,13 +1,13 @@
 from datetime import datetime, UTC, timedelta
 import json
-from config import bot, cupboard_chat_id, gift_lab_chat_id
+from config import bot, cupboard_chat_id, gift_lab_chat_id, prep_days
 
 
 def check_birthday(date_format: str, birthdays_file: str) -> None:
     today = datetime.now(UTC).date()
 
     today_birthday = today.strftime(date_format)
-    upcoming_birthday = (today + timedelta(days=3)).strftime(date_format)
+    upcoming_birthday = (today + timedelta(days=prep_days)).strftime(date_format)
     past_birthday = (today - timedelta(days=1)).strftime(date_format)
 
     with open(birthdays_file) as file:
@@ -37,8 +37,12 @@ def congratulate(id: str) -> None:
 
 
 def ban(id: str) -> None:
-    raise NotImplementedError
+    bot.ban_chat_member(gift_lab_chat_id, id)
+
+    username = bot.get_chat(id).username
+    message = f"Через {prep_days} дня у {username} день рождения, поэтому я ЗАБАНИЛ его, чтобы вы смогли в тайне подготовить подарок. Удачи! :)"
+    bot.send_message(gift_lab_chat_id, message)
 
 
 def unban(id: str) -> None:
-    raise NotImplementedError
+    bot.unban_chat_member(gift_lab_chat_id, id)
