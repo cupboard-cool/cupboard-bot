@@ -6,7 +6,7 @@ import time
 
 import functions
 import messages
-from config import bot, key, token
+from config import bot, key, token, birthdays_file
 import birthday
 
 from flask_sslify import SSLify
@@ -26,7 +26,7 @@ def run_continuously(interval=60):
     continuous_thread.start()
     return cease_continuous_run
 
-schedule.every().day.at("06:00", "utc").do(birthday.check_birthday, "%Y-%m-%d", "cupboard_birthdays.json")
+schedule.every().day.at("06:00", "utc").do(birthday.check_birthday, "%Y-%m-%d", birthdays_file)
 stop_run_continuously = run_continuously()
 
 app = Flask(__name__)
