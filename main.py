@@ -1,6 +1,8 @@
 from flask import Flask, request
 import telegram
 import schedule
+import threading
+import time
 
 import functions
 import messages
@@ -9,10 +11,27 @@ import gift_lab
 
 from flask_sslify import SSLify
 
+
+def run_continuously(interval=60):
+    cease_continuous_run = threading.Event()
+
+    class ScheduleThread(threading.Thread):
+        @classmethod
+        def run(cls):
+            while not cease_continuous_run.is_set():
+                schedule.run_pending()
+                time.sleep(interval)
+
+    continuous_thread = ScheduleThread()
+    continuous_thread.start()
+    return cease_continuous_run
+
+schedule.every().day.at("06:00", "utc").do(gift_lab.check_birthday, "%Y-%m-%d", "cupboard_birthdays.json")
+stop_run_continuously = run_continuously()
+
 app = Flask(__name__)
 sslify = SSLify(app)
 
-schedule.every().day.at("06:00", "utc").do(gift_lab.check_birthday("%Y-%m-%d", "cupboard_birthdays.json"))
 
 @app.route(f'/{token}', methods=['POST'])
 def index():
@@ -36,6 +55,7 @@ def index():
         pass
     return 'A'
 
+
 @app.route(f"/{key}", methods=['POST'])
 def notify():
     try:
@@ -48,3 +68,4 @@ def notify():
 
 if __name__ == '__main__':
     app.run(debug=True)
+    stop_run_continuously.set()
