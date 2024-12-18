@@ -1,5 +1,8 @@
 from flask import Flask, request
 import telegram
+import schedule
+from datetime import datetime
+import json
 
 import functions
 import messages
@@ -11,6 +14,26 @@ app = Flask(__name__)
 sslify = SSLify(app)
 
 bot = telegram.Bot(config.token)
+
+
+def check_birthday():
+    today = datetime.now(datetime.UTC)
+    with open("cupboard_birthdays.json") as file:
+        birthdays = json.load(file)
+
+    upcoming_birthday = today + 3
+    past_birthday = today - 1
+
+    if (upcoming_birthday in birthdays.keys()):
+        ban(birthdays[upcoming_birthday])
+
+    if (past_birthday in birthdays.keys()):
+        unban(birthdays[past_birthday])
+
+    if (today in birthdays.keys()):
+        congratulate()
+
+schedule.every().day.at("06:00", "utc").do(check_birthday)
 
 @app.route(f'/{config.token}', methods=['POST'])
 def index():
