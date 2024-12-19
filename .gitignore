@@ -5,4 +5,4 @@
 __pycache__
 
 config.ini
-followers.json
+*.json
