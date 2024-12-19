@@ -1,1 +1,6 @@
-config.py
+.idea
+.venv
+__pycache__
+
+config.ini
+followers.json

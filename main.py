@@ -1,48 +1,166 @@
-from flask import Flask, request
-import telegram
+import sys
+import json
+from typing import NoReturn
+from random import choice
+from difflib import get_close_matches
 
-import functions
+import telebot
+from telebot import TeleBot, BaseMiddleware
+from kaomoji.kaomoji import Kaomoji
+
 import messages
-import config
+import functions
+from config import BOT_TOKEN, FOLLOWERS_DATA_FILE
 
-from flask_sslify import SSLify
+try:
+    bot = TeleBot(token=BOT_TOKEN, use_class_middlewares=True)
+except ValueError:
+    print('Bot token is invalid')
+    sys.exit()
 
-app = Flask(__name__)
-sslify = SSLify(app)
+kao = Kaomoji()
 
-bot = telegram.Bot(config.token)
 
-@app.route(f'/{config.token}', methods=['POST'])
-def index():
-    try:
-        update = telegram.Update.de_json(request.get_json(force=True), bot)
-        chat_id = update.message.chat.id
-        chat_type = update.message.chat.type
+class Middleware(BaseMiddleware):
+    def __init__(self):
+        super().__init__()
+        self.update_types = ['message']
 
-        msg_text = update.message.text.encode('utf-8').decode()
-
+    def pre_process(self, message, data):
         for symbol in messages.forbidden:
-            if symbol in msg_text: msg_text = msg_text.replace(symbol, "").lower()
-        msg_words = msg_text.split(' ')
+            if symbol in message.text:
+                message.text = message.text.replace(symbol, "").lower()
 
-        username = update.message.from_user.username if update.message.from_user.username else 'unknown'
-
-        print(msg_text, chat_id, username, msg_words, chat_type)
-        functions.process_command(msg_text, chat_id, username, chat_type)
-        functions.process_message(msg_text, chat_id, username, msg_words, chat_type)
-    except:
+    def post_process(self, message, data, exception=None):
         pass
-    return 'A'
 
-@app.route(f"/{config.key}", methods=['POST'])
-def notify():
+
+bot.setup_middleware(Middleware())
+
+
+def notify_followers(message: str) -> NoReturn:
     try:
-        r = request.get_json()
-        message = r['message']
-        functions.notify_followers(message)
-    except:
-        pass
-    return 'B'
+        with open(FOLLOWERS_DATA_FILE) as followers_data:
+            followers = json.load(followers_data)['followers']
+    except FileNotFoundError:
+        followers = []
+
+    if len(followers) == 0:
+        print('No followers')
+    else:
+        for follower in followers:
+            bot.send_message(follower['chat_id'], message)
+
+
+@bot.message_handler(commands=['try'])
+def try_command(message: telebot.types.Message) -> NoReturn:
+    action = message.text.split(' ', 1)[1] if len(message.text.split(' ', 1)) > 1 else None
+    username = message.from_user.username if message.from_user.username else 'unknown'
+
+    if action is None:
+        text = 'Что ты вообще пытаешься сделать? O.O'
+    else:
+        is_successfull = functions.try_todo(action)
+
+        result = 'получилось' if is_successfull else 'не получилось'
+        kao_categories = ['joy', 'love'] if is_successfull else ['indifference', 'sadness']
+
+        kaomoji = kao.create(category=choice(kao_categories))
+        text = f'У {username} {result} {action} {kaomoji}'
+
+    bot.reply_to(message, text)
+
+
+@bot.message_handler(commands=['follow'])
+def follow_command(message: telebot.types.Message) -> NoReturn:
+    user_id = str(message.from_user.id)
+    response = functions.follow_notifications(user_id)
+
+    bot.send_message(user_id, response)
+
+
+@bot.message_handler(commands=['unfollow'])
+def unfollow_command(message: telebot.types.Message) -> NoReturn:
+    user_id = str(message.from_user.id)
+    response = functions.unfollow_notifications(user_id)
+
+    bot.send_message(user_id, response)
+
+
+@bot.message_handler(func=lambda message: True)
+def any_message(message: telebot.types.Message) -> NoReturn:
+    username = message.from_user.username if message.from_user.username else 'unknown'
+    message_text = message.text
+    message_words = message_text.split(' ')
+    chat_type = message.chat.type
+    chat_id = message.chat.id
+
+    for trigger_message_dictionary in messages.trigger_message_dictionaries_list:
+        trigger_matches = [trigger_message_array_obj for trigger_message_array_obj in
+                           trigger_message_dictionary['trigger_message_array'] if
+                           trigger_message_array_obj in message_text.lower()]
+
+        close_trigger_matches = get_close_matches(
+            word=message_text.lower(),
+            possibilities=trigger_message_dictionary['trigger_message_array'],
+            n=1,
+            cutoff=0.7
+        )
+
+        if trigger_matches or close_trigger_matches:
+            if chat_type == 'private':
+                bot.send_message(chat_id, choice(trigger_message_dictionary['response_message_array']).format(username))
+                break
+            else:
+                name_trigger_matches = [name_trigger for name_trigger in messages.name_triggers if
+                                        name_trigger in message_words]
+                close_name_trigger_matches = [get_close_matches(name_trigger, message_words) for name_trigger in
+                                              messages.name_triggers if get_close_matches(name_trigger, message_words)]
+
+                if name_trigger_matches or close_name_trigger_matches:
+                    bot.send_message(chat_id,
+                                     choice(trigger_message_dictionary['response_message_array']).format(username))
+                    break
+    else:
+        for nontarget_trigger_message_dictionary in messages.nontarget_trigger_message_dictionaries_list:
+            trigger_matches = [
+                {'text': trigger_message_array_obj, 'action': nontarget_trigger_message_dictionary['action']} for
+                trigger_message_array_obj in nontarget_trigger_message_dictionary['trigger_message_array'] if
+                trigger_message_array_obj in message_text.lower()]
+
+            close_trigger_matches = get_close_matches(
+                word=message_text.lower(),
+                possibilities=nontarget_trigger_message_dictionary['trigger_message_array'],
+                n=1,
+                cutoff=0.7
+            )
+
+            if trigger_matches or close_trigger_matches:
+                if trigger_matches[0]['action'] != 'sneeze':
+                    bot.send_message(
+                        chat_id=chat_id,
+                        text=choice(nontarget_trigger_message_dictionary['response_message_array']).format(username)
+                    )
+
+                    break
+                elif get_close_matches(
+                        word=message_text.lower(),
+                        possibilities=nontarget_trigger_message_dictionary['trigger_message_array'],
+                        n=1,
+                        cutoff=1
+                ):
+
+                    bot.send_message(
+                        chat_id,
+                        choice(nontarget_trigger_message_dictionary['response_message_array']).format(username))
+
+                    break
+
+
+def main() -> NoReturn:
+    print("Program started.")
+    bot.infinity_polling()
+
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    main()
