@@ -1,3 +1,5 @@
+import time
+import threading
 import sys
 import json
 from typing import NoReturn
@@ -5,12 +7,15 @@ from random import choice
 from difflib import get_close_matches
 
 import telebot
+import schedule
 from telebot import TeleBot, BaseMiddleware
+from schedule import every, repeat
 from kaomoji.kaomoji import Kaomoji
 
 import messages
 import functions
-from config import BOT_TOKEN, FOLLOWERS_DATA_FILE
+import birthday
+from config import BOT_TOKEN, FOLLOWERS_DATA_FILE, BIRTHDAYS_DATA_FILE, BIRTHDAY_DATE_FORMAT
 
 try:
     bot = TeleBot(token=BOT_TOKEN, use_class_middlewares=True)
@@ -18,7 +23,25 @@ except ValueError:
     print('Bot token is invalid')
     sys.exit()
 
-kao = Kaomoji()
+
+def schedule_run_continuously(interval=60):
+    cease_continuous_run = threading.Event()
+
+    class ScheduleThread(threading.Thread):
+        @classmethod
+        def run(cls):
+            while not cease_continuous_run.is_set():
+                schedule.run_pending()
+                time.sleep(interval)
+
+    continuous_thread = ScheduleThread()
+    continuous_thread.start()
+    return cease_continuous_run
+
+
+@repeat(every().day.at("06:00", "utc"))
+def process_day() -> NoReturn:
+    birthday.check_birthday(bot, BIRTHDAY_DATE_FORMAT, BIRTHDAYS_DATA_FILE)
 
 
 class Middleware(BaseMiddleware):
@@ -36,6 +59,8 @@ class Middleware(BaseMiddleware):
 
 
 bot.setup_middleware(Middleware())
+
+kao = Kaomoji()
 
 
 def notify_followers(message: str) -> NoReturn:
@@ -159,7 +184,9 @@ def any_message(message: telebot.types.Message) -> NoReturn:
 
 def main() -> NoReturn:
     print("Program started.")
+    stop_schedule_run = schedule_run_continuously()
     bot.infinity_polling()
+    stop_schedule_run.set()
 
 
 if __name__ == '__main__':
