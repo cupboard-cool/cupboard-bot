@@ -1,4 +1,4 @@
-from random import choice, getrandbits
+from random import getrandbits
 import json
 from typing import Optional
 
