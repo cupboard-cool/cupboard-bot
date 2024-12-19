@@ -161,5 +161,6 @@ def main() -> NoReturn:
     print("Program started.")
     bot.infinity_polling()
 
+
 if __name__ == '__main__':
     main()
