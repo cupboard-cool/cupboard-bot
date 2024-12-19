@@ -1,1 +1,5 @@
-config.py
+.idea
+.venv
+
+config.ini
+followers.json
