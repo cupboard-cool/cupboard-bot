@@ -1,20 +1,19 @@
-import json
 import sys
-from random import choice
+import json
 from typing import NoReturn
-
-import telebot
-from telebot import BaseMiddleware
-from kaomoji.kaomoji import Kaomoji
+from random import choice
 from difflib import get_close_matches
 
-import functions
-import messages
+import telebot
+from telebot import TeleBot, BaseMiddleware
+from kaomoji.kaomoji import Kaomoji
 
-from config import *
+import messages
+import functions
+from config import BOT_TOKEN, FOLLOWERS_DATA_FILE
 
 try:
-    bot = telebot.TeleBot(token=BOT_TOKEN, use_class_middlewares=True)
+    bot = TeleBot(token=BOT_TOKEN, use_class_middlewares=True)
 except ValueError:
     print('Bot token is invalid')
     sys.exit()

@@ -1,10 +1,9 @@
-import configparser
-
 from os.path import isfile
+from configparser import ConfigParser
 
 
 def create_config(config_path):
-    config = configparser.ConfigParser()
+    config = ConfigParser()
 
     config['General'] = {
         'debug': 'True'
@@ -22,7 +21,7 @@ def create_config(config_path):
 
 
 def read_config(config_path):
-    config = configparser.ConfigParser()
+    config = ConfigParser()
 
     config.read(config_path)
 

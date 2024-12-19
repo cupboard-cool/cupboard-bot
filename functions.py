@@ -1,9 +1,9 @@
-from random import getrandbits
 import json
 from typing import Optional
+from random import getrandbits
 
 import messages
-from config import *
+from config import FOLLOWERS_DATA_FILE
 
 
 def try_todo(action: Optional[str]) -> bool:
