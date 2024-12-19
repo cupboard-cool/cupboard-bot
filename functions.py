@@ -5,7 +5,7 @@ import json
 import messages
 import config
 
-from main import bot
+from config import bot
 
 
 
