@@ -7,7 +7,7 @@ def create_config(config_path):
 
     config['General'] = {
         'debug': 'True',
-        'birthday_date_format': '%Y-%m-%d',
+        'birthday_date_format': '%%Y-%%m-%%d',
         'gift_prep_days': 3
     }
     config['Bot'] = {
