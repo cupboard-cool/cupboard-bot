@@ -51,7 +51,7 @@ class Middleware(BaseMiddleware):
 
     def pre_process(self, message, data):
         for symbol in messages.forbidden:
-            if symbol in message.text:
+            if message.text is not None and symbol in message.text:
                 message.text = message.text.replace(symbol, "").lower()
 
     def post_process(self, message, data, exception=None):

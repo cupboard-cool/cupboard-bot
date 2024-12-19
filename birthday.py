@@ -18,7 +18,7 @@ def check_birthday(bot: TeleBot, date_format: str, birthdays_file: str) -> None:
         birthdays = birthdays_list.keys()
     
     if (today_birthday in birthdays):
-        congratulate(bot, birthdays_list[today])
+        congratulate(bot, birthdays_list[today_birthday])
 
     if (upcoming_birthday in birthdays):
         ban(bot, birthdays_list[upcoming_birthday])
@@ -30,22 +30,28 @@ def check_birthday(bot: TeleBot, date_format: str, birthdays_file: str) -> None:
 def congratulate(bot: TeleBot, id: str) -> None:
     username = bot.get_chat(id).username
 
-    gift_chat_message = f"У {username} сегодня день рождения, не забудьте отправить подарки!"
+    gift_chat_message = f"У @{username} сегодня день рождения, не забудьте отправить подарки!"
     bot.send_message(GIFT_CHAT_ID, gift_chat_message)
 
-    main_chat_message = f"С днём рождения, {username}!"
-    main_chat_emoji = u"\ue34b"
-    bot.send_message(MAIN_CHAT_ID, main_chat_message)
-    bot.send_message(MAIN_CHAT_ID, main_chat_emoji)
+    main_chat_message0 = f"С днём рождения, @{username}!"
+    main_chat_message1 = "\U0001F382"
+    bot.send_message(MAIN_CHAT_ID, main_chat_message0)
+    bot.send_message(MAIN_CHAT_ID, main_chat_message1)
 
 
 def ban(bot: TeleBot, id: str) -> None:
-    bot.ban_chat_member(GIFT_CHAT_ID, id)
+    banned = bot.ban_chat_member(GIFT_CHAT_ID, id)
 
-    username = bot.get_chat(id).username
-    message = f"Через {GIFT_PREP_DAYS} дня у {username} день рождения, поэтому я ЗАБАНИЛ его, чтобы вы смогли в тайне подготовить подарок. Удачи! :)"
-    bot.send_message(GIFT_CHAT_ID, message)
+    if banned:
+        username = bot.get_chat(id).username
+        message = f"Через {GIFT_PREP_DAYS} дня у @{username} день рождения, поэтому я ЗАБАНИЛ его, чтобы вы смогли в тайне подготовить подарок. Удачи! :)"
+        bot.send_message(GIFT_CHAT_ID, message)
 
 
 def unban(bot: TeleBot, id: str) -> None:
-    bot.unban_chat_member(GIFT_CHAT_ID, id)
+    unbanned = bot.unban_chat_member(GIFT_CHAT_ID, id)
+
+    if unbanned:
+        username = bot.get_chat(id).username
+        message = f"@{username} отметил день рождения и теперь разбанен."
+        bot.send_message(GIFT_CHAT_ID, message)
