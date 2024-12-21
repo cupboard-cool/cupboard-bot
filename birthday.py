@@ -12,7 +12,7 @@ def check_birthday(bot: TeleBot) -> None:
     with open(BIRTHDAYS_DATA_FILE) as file:
         birthdays_data: dict[str, str] = json.load(file)
 
-    for bday, uid in birthdays_data.items:
+    for bday, uid in birthdays_data.items():
         birthday = date.fromisoformat(bday)
         
         delta = today - birthday.replace(year=today.year)
@@ -28,10 +28,10 @@ def check_birthday(bot: TeleBot) -> None:
 def congratulate(bot: TeleBot, id: str, birthday: date) -> None:
     mention = get_mention(bot, id)
 
-    gift_chat_message = f"У {mention} сегодня день рождения, не забудьте отправить подарки!"
+    gift_chat_message = f"У {mention} сегодня день рождения, не забудьте отправить подарки\\!"
     bot.send_message(GIFT_CHAT_ID, gift_chat_message, "MarkdownV2")
 
-    main_chat_message0 = f"С днём рождения, {mention}!"
+    main_chat_message0 = f"С днём рождения, {mention}\\!"
     main_chat_message1 = "\U0001F382"
     bot.send_message(MAIN_CHAT_ID, main_chat_message0, "MarkdownV2")
     bot.send_message(MAIN_CHAT_ID, main_chat_message1)
@@ -42,7 +42,7 @@ def ban(bot: TeleBot, id: str) -> None:
 
     if banned:
         mention = get_mention(bot, id)
-        message = f"Через {GIFT_PREP_DAYS} дня (или меньше) у {mention} день рождения, поэтому я ЗАБАНИЛ его, чтобы вы смогли в тайне подготовить подарок. Удачи! :)"
+        message = f"Через {GIFT_PREP_DAYS} дня (или меньше) у {mention} день рождения, поэтому я ЗАБАНИЛ его, чтобы вы смогли в тайне подготовить подарок. Удачи\\! :)"
         bot.send_message(GIFT_CHAT_ID, message, "MarkdownV2")
 
 
@@ -63,6 +63,6 @@ def get_mention(bot: TeleBot, id: str) -> str:
     if username is not None:
         mention = f"@{username}"
     else:
-        mention = f"[{chat_info.first_name} {chat_info.last_name}](tg://user?id={id})"
+        mention = f"[{chat_info.first_name}](tg://user?id={id})"
 
     return mention
