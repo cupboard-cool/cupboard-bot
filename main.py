@@ -15,7 +15,7 @@ from kaomoji.kaomoji import Kaomoji
 import messages
 import functions
 import birthday
-from config import BOT_TOKEN, FOLLOWERS_DATA_FILE, BIRTHDAYS_DATA_FILE, BIRTHDAY_DATE_FORMAT
+from config import BOT_TOKEN, FOLLOWERS_DATA_FILE
 
 try:
     bot = TeleBot(token=BOT_TOKEN, use_class_middlewares=True)
@@ -41,7 +41,7 @@ def schedule_run_continuously(interval=60):
 
 @repeat(every().day.at("06:00", "utc"))
 def process_day() -> NoReturn:
-    birthday.check_birthday(bot, BIRTHDAY_DATE_FORMAT, BIRTHDAYS_DATA_FILE)
+    birthday.check_birthday(bot)
 
 
 class Middleware(BaseMiddleware):

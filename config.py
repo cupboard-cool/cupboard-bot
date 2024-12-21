@@ -7,7 +7,6 @@ def create_config(config_path):
 
     config['General'] = {
         'debug': 'True',
-        'birthday_date_format': '%%Y-%%m-%%d',
         'gift_prep_days': 3
     }
     config['Bot'] = {
@@ -41,7 +40,6 @@ def read_config(config_path):
     birthdays_data_file = config.get('Files', 'birthdays_data')
     main_chat_id = config.get('Chats', 'main_chat_id')
     gift_chat_id = config.get('Chats', 'gift_chat_id')
-    birthday_date_format = config.get('General', 'birthday_date_format')
     gift_prep_days = config.getint('General', 'gift_prep_days')
 
     config_values = {
@@ -51,7 +49,6 @@ def read_config(config_path):
         'birthdays_data_file': birthdays_data_file,
         'main_chat_id': main_chat_id,
         'gift_chat_id': gift_chat_id,
-        'birthday_date_format': birthday_date_format,
         'gift_prep_days': gift_prep_days 
     }
 
@@ -71,5 +68,4 @@ FOLLOWERS_DATA_FILE = config_values['followers_data_file']
 BIRTHDAYS_DATA_FILE = config_values['birthdays_data_file']
 MAIN_CHAT_ID = config_values['main_chat_id']
 GIFT_CHAT_ID = config_values['gift_chat_id']
-BIRTHDAY_DATE_FORMAT = config_values['birthday_date_format']
 GIFT_PREP_DAYS = config_values['gift_prep_days']
