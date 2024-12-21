@@ -20,20 +20,20 @@ def check_birthday(bot: TeleBot) -> None:
         if delta.days >= 1:
             unban(bot, uid)
         elif delta.days == 0:
-            congratulate(bot, uid, birthday)
+            congratulate(bot, uid, today.year - birthday.year)
         elif delta.days >= -GIFT_PREP_DAYS:
             ban(bot, uid)
 
 
-def congratulate(bot: TeleBot, id: str, birthday: date) -> None:
+def congratulate(bot: TeleBot, id: str, years: int) -> None:
     mention = get_mention(bot, id)
 
-    gift_chat_message = f"У {mention} сегодня день рождения, не забудьте отправить подарки\\!"
-    bot.send_message(GIFT_CHAT_ID, gift_chat_message, "MarkdownV2")
+    gift_chat_message = f"У {mention} сегодня день рождения, не забудьте отправить подарки!"
+    bot.send_message(GIFT_CHAT_ID, gift_chat_message, "HTML")
 
-    main_chat_message0 = f"С днём рождения, {mention}\\!"
+    main_chat_message0 = f"Поздравляю с днём рождения и {years}-летием, {mention}!"
     main_chat_message1 = "\U0001F382"
-    bot.send_message(MAIN_CHAT_ID, main_chat_message0, "MarkdownV2")
+    bot.send_message(MAIN_CHAT_ID, main_chat_message0, "HTML")
     bot.send_message(MAIN_CHAT_ID, main_chat_message1)
 
 
@@ -45,8 +45,8 @@ def ban(bot: TeleBot, id: str) -> None:
 
     if banned_successfully:
         mention = get_mention(bot, id)
-        message = f"Через {GIFT_PREP_DAYS} дня (или меньше) у {mention} день рождения, поэтому я ЗАБАНИЛ его, чтобы вы смогли в тайне подготовить подарок. Удачи\\! :)"
-        bot.send_message(GIFT_CHAT_ID, message, "MarkdownV2")
+        message = f"Через {GIFT_PREP_DAYS} дня (или меньше) у {mention} день рождения, поэтому я ЗАБАНИЛ его, чтобы вы смогли в тайне подготовить подарок. Удачи! :)"
+        bot.send_message(GIFT_CHAT_ID, message, "HTML")
 
 
 def unban(bot: TeleBot, id: str) -> None:
@@ -58,7 +58,7 @@ def unban(bot: TeleBot, id: str) -> None:
     if unbanned_successfully:
         mention = get_mention(bot, id)
         message = f"{mention} отметил день рождения и теперь разбанен."
-        bot.send_message(GIFT_CHAT_ID, message, "MarkdownV2")
+        bot.send_message(GIFT_CHAT_ID, message, "HTML")
 
 
 def get_mention(bot: TeleBot, id: str) -> str:
@@ -69,6 +69,6 @@ def get_mention(bot: TeleBot, id: str) -> str:
     if username is not None:
         mention = f"@{username}"
     else:
-        mention = f"[{chat_info.first_name}](tg://user?id={id})"
+        mention = f"<a href=\"tg://user?id={id}\">{chat_info.first_name}</a>"
 
     return mention
