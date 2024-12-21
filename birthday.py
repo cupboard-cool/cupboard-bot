@@ -1,33 +1,31 @@
 import json
-from datetime import datetime, UTC, timedelta
+from datetime import datetime, UTC, date
 
 from telebot import TeleBot
 
-from config import MAIN_CHAT_ID, GIFT_CHAT_ID, GIFT_PREP_DAYS
+from config import MAIN_CHAT_ID, GIFT_CHAT_ID, GIFT_PREP_DAYS, BIRTHDAYS_DATA_FILE
 
 
-def check_birthday(bot: TeleBot, date_format: str, birthdays_file: str) -> None:
+def check_birthday(bot: TeleBot) -> None:
     today = datetime.now(UTC).date()
 
-    today_birthday = today.strftime(date_format)
-    upcoming_birthday = (today + timedelta(days=GIFT_PREP_DAYS)).strftime(date_format)
-    past_birthday = (today - timedelta(days=1)).strftime(date_format)
+    with open(BIRTHDAYS_DATA_FILE) as file:
+        birthdays_data: dict[str, str] = json.load(file)
 
-    with open(birthdays_file) as file:
-        birthdays_list = json.load(file)
-        birthdays = birthdays_list.keys()
-    
-    if (today_birthday in birthdays):
-        congratulate(bot, birthdays_list[today_birthday])
+    for bday, uid in birthdays_data.items:
+        birthday = date.fromisoformat(bday)
+        
+        delta = today - birthday.replace(year=today.year)
 
-    if (upcoming_birthday in birthdays):
-        ban(bot, birthdays_list[upcoming_birthday])
-
-    if (past_birthday in birthdays):
-        unban(bot, birthdays_list[past_birthday])
+        if delta.days >= 1:
+            unban(bot, uid)
+        elif delta.days == 0:
+            congratulate(bot, uid, birthday)
+        elif delta.days >= -GIFT_PREP_DAYS:
+            ban(bot, uid)
 
 
-def congratulate(bot: TeleBot, id: str) -> None:
+def congratulate(bot: TeleBot, id: str, birthday: date) -> None:
     username = bot.get_chat(id).username
 
     gift_chat_message = f"У @{username} сегодня день рождения, не забудьте отправить подарки!"
@@ -44,7 +42,7 @@ def ban(bot: TeleBot, id: str) -> None:
 
     if banned:
         username = bot.get_chat(id).username
-        message = f"Через {GIFT_PREP_DAYS} дня у @{username} день рождения, поэтому я ЗАБАНИЛ его, чтобы вы смогли в тайне подготовить подарок. Удачи! :)"
+        message = f"Через {GIFT_PREP_DAYS} дня (или меньше) у @{username} день рождения, поэтому я ЗАБАНИЛ его, чтобы вы смогли в тайне подготовить подарок. Удачи! :)"
         bot.send_message(GIFT_CHAT_ID, message)
 
 
