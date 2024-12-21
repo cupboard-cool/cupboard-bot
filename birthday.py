@@ -38,18 +38,24 @@ def congratulate(bot: TeleBot, id: str, birthday: date) -> None:
 
 
 def ban(bot: TeleBot, id: str) -> None:
-    banned = bot.ban_chat_member(GIFT_CHAT_ID, id)
+    if bot.get_chat_member().status == "kicked":
+        return
+    
+    banned_successfully = bot.ban_chat_member(GIFT_CHAT_ID, id)
 
-    if banned:
+    if banned_successfully:
         mention = get_mention(bot, id)
         message = f"Через {GIFT_PREP_DAYS} дня (или меньше) у {mention} день рождения, поэтому я ЗАБАНИЛ его, чтобы вы смогли в тайне подготовить подарок. Удачи\\! :)"
         bot.send_message(GIFT_CHAT_ID, message, "MarkdownV2")
 
 
 def unban(bot: TeleBot, id: str) -> None:
-    unbanned = bot.unban_chat_member(GIFT_CHAT_ID, id)
+    if bot.get_chat_member().status != "kicked":
+        return
+    
+    unbanned_successfully = bot.unban_chat_member(GIFT_CHAT_ID, id)
 
-    if unbanned:
+    if unbanned_successfully:
         mention = get_mention(bot, id)
         message = f"{mention} отметил день рождения и теперь разбанен."
         bot.send_message(GIFT_CHAT_ID, message, "MarkdownV2")
