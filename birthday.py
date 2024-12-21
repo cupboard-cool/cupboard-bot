@@ -38,7 +38,7 @@ def congratulate(bot: TeleBot, id: str, birthday: date) -> None:
 
 
 def ban(bot: TeleBot, id: str) -> None:
-    if bot.get_chat_member().status == "kicked":
+    if bot.get_chat_member(GIFT_CHAT_ID, id).status == "kicked":
         return
     
     banned_successfully = bot.ban_chat_member(GIFT_CHAT_ID, id)
@@ -50,7 +50,7 @@ def ban(bot: TeleBot, id: str) -> None:
 
 
 def unban(bot: TeleBot, id: str) -> None:
-    if bot.get_chat_member().status != "kicked":
+    if bot.get_chat_member(GIFT_CHAT_ID, id).status != "kicked":
         return
     
     unbanned_successfully = bot.unban_chat_member(GIFT_CHAT_ID, id)
