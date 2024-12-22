@@ -16,13 +16,14 @@ def check_birthday(bot: TeleBot) -> None:
         birthday = date.fromisoformat(bday)
         
         delta = today - birthday.replace(year=today.year)
+        years = today.year - birthday.year
 
         if delta.days >= 1:
             unban(bot, uid)
         elif delta.days == 0:
-            congratulate(bot, uid, today.year - birthday.year)
+            congratulate(bot, uid, years)
         elif delta.days >= -GIFT_PREP_DAYS:
-            ban(bot, uid)
+            ban(bot, uid, years)
 
 
 def congratulate(bot: TeleBot, id: str, years: int) -> None:
@@ -31,13 +32,17 @@ def congratulate(bot: TeleBot, id: str, years: int) -> None:
     gift_chat_message = f"У {mention} сегодня день рождения, не забудьте отправить подарки!"
     bot.send_message(GIFT_CHAT_ID, gift_chat_message, "HTML")
 
-    main_chat_message0 = f"Поздравляю с днём рождения и {years}-летием, {mention}!"
+    if years % 5 == 0:
+        main_chat_message0 = f"Поздравляю с днём рождения и {years}-летием, {mention}!"
+    else:
+        main_chat_message0 = f"С днём рождения, {mention}! Тебе уже {years} :)"
+
     main_chat_message1 = "\U0001F382"
     bot.send_message(MAIN_CHAT_ID, main_chat_message0, "HTML")
     bot.send_message(MAIN_CHAT_ID, main_chat_message1)
 
 
-def ban(bot: TeleBot, id: str) -> None:
+def ban(bot: TeleBot, id: str, years: int) -> None:
     if bot.get_chat_member(GIFT_CHAT_ID, id).status == "kicked":
         return
     
@@ -45,7 +50,7 @@ def ban(bot: TeleBot, id: str) -> None:
 
     if banned_successfully:
         mention = get_mention(bot, id)
-        message = f"Через {GIFT_PREP_DAYS} дня (или меньше) у {mention} день рождения, поэтому я ЗАБАНИЛ его, чтобы вы смогли в тайне подготовить подарок. Удачи! :)"
+        message = f"Через {GIFT_PREP_DAYS} дня (или меньше) у {mention} день рождения ({years} лет), поэтому я ЗАБАНИЛ его, чтобы вы смогли в тайне подготовить подарок. Удачи! :)"
         bot.send_message(GIFT_CHAT_ID, message, "HTML")
 
 
