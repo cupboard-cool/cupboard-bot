@@ -6,14 +6,20 @@ def create_config(config_path):
     config = ConfigParser()
 
     config['General'] = {
-        'debug': 'True'
+        'debug': 'True',
+        'gift_prep_days': 3
     }
     config['Bot'] = {
         'token': '',
         'debug_token': ''
     }
     config['Files'] = {
-        'followers_data': 'followers.json'
+        'followers_data': 'followers.json',
+        'birthdays_data': 'birthdays.json'
+    }
+    config['Chats'] = {
+        'main_chat_id': '',
+        'gift_chat_id': ''
     }
 
     with open(config_path, 'w') as configfile:
@@ -31,14 +37,22 @@ def read_config(config_path):
         else config.get('Bot', 'token')
 
     followers_data_file = config.get('Files', 'followers_data')
+    birthdays_data_file = config.get('Files', 'birthdays_data')
+    main_chat_id = config.get('Chats', 'main_chat_id')
+    gift_chat_id = config.get('Chats', 'gift_chat_id')
+    gift_prep_days = config.getint('General', 'gift_prep_days')
 
-    config_vals = {
+    config_values = {
         'debug_mode': debug_mode,
+        'bot_token': bot_token,
         'followers_data_file': followers_data_file,
-        'bot_token': bot_token
+        'birthdays_data_file': birthdays_data_file,
+        'main_chat_id': main_chat_id,
+        'gift_chat_id': gift_chat_id,
+        'gift_prep_days': gift_prep_days 
     }
 
-    return config_vals
+    return config_values
 
 
 config_file = 'config.ini'
@@ -51,3 +65,7 @@ config_values = read_config(config_file)
 DEBUG_MODE = config_values['debug_mode']
 BOT_TOKEN = config_values['bot_token']
 FOLLOWERS_DATA_FILE = config_values['followers_data_file']
+BIRTHDAYS_DATA_FILE = config_values['birthdays_data_file']
+MAIN_CHAT_ID = config_values['main_chat_id']
+GIFT_CHAT_ID = config_values['gift_chat_id']
+GIFT_PREP_DAYS = config_values['gift_prep_days']

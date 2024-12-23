@@ -1,6 +1,8 @@
 .idea
+.vscode
+
 .venv
 __pycache__
 
 config.ini
-followers.json
+*.json
