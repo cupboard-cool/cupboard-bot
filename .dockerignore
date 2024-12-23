@@ -1,0 +1,15 @@
+__pycache__
+.venv
+.vscode
+.idea
+
+.git
+.gitignore
+
+.dockerignore
+docker-compose*
+compose.y*ml
+Dockerfile*
+
+LICENSE
+test_birthdays.json
