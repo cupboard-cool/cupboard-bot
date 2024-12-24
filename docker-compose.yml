@@ -1,0 +1,9 @@
+services:
+  bot:
+    image: cupboard-bot
+    environment:
+      BOT_TOKEN: ""
+      MAIN_CHAT_ID: ""
+      GIFT_CHAT_ID: ""
+    volumes:
+      - ./data:/data
