@@ -1,71 +1,17 @@
-from os.path import isfile
-from configparser import ConfigParser
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
 
-def create_config(config_path):
-    config = ConfigParser()
+env = os.getenv("APP_ENV", "development")
 
-    config['General'] = {
-        'debug': 'True',
-        'gift_prep_days': 3
-    }
-    config['Bot'] = {
-        'token': '',
-        'debug_token': ''
-    }
-    config['Files'] = {
-        'followers_data': 'followers.json',
-        'birthdays_data': 'birthdays.json'
-    }
-    config['Chats'] = {
-        'main_chat_id': '',
-        'gift_chat_id': ''
-    }
+env_file = f"{env}.env"
+if os.path.exists(env_file):
+    load_dotenv(env_file)
 
-    with open(config_path, 'w') as configfile:
-        config.write(configfile)
-
-
-def read_config(config_path):
-    config = ConfigParser()
-
-    config.read(config_path)
-
-    debug_mode = config.getboolean('General', 'debug')
-
-    bot_token = config.get('Bot', 'debug_token') if debug_mode \
-        else config.get('Bot', 'token')
-
-    followers_data_file = config.get('Files', 'followers_data')
-    birthdays_data_file = config.get('Files', 'birthdays_data')
-    main_chat_id = config.get('Chats', 'main_chat_id')
-    gift_chat_id = config.get('Chats', 'gift_chat_id')
-    gift_prep_days = config.getint('General', 'gift_prep_days')
-
-    config_values = {
-        'debug_mode': debug_mode,
-        'bot_token': bot_token,
-        'followers_data_file': followers_data_file,
-        'birthdays_data_file': birthdays_data_file,
-        'main_chat_id': main_chat_id,
-        'gift_chat_id': gift_chat_id,
-        'gift_prep_days': gift_prep_days 
-    }
-
-    return config_values
-
-
-config_file = 'config.ini'
-
-if not isfile(config_file):
-    create_config(config_file)
-
-config_values = read_config(config_file)
-
-DEBUG_MODE = config_values['debug_mode']
-BOT_TOKEN = config_values['bot_token']
-FOLLOWERS_DATA_FILE = config_values['followers_data_file']
-BIRTHDAYS_DATA_FILE = config_values['birthdays_data_file']
-MAIN_CHAT_ID = config_values['main_chat_id']
-GIFT_CHAT_ID = config_values['gift_chat_id']
-GIFT_PREP_DAYS = config_values['gift_prep_days']
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+MAIN_CHAT_ID = os.getenv("MAIN_CHAT_ID")
+GIFT_CHAT_ID = os.getenv("GIFT_CHAT_ID")
+FOLLOWERS_DATA_FILE = os.getenv("FOLLOWERS_DATA_FILE", "data/followers.json")
+BIRTHDAYS_DATA_FILE = os.getenv("BIRTHDAYS_DATA_FILE", "data/birthdays.json")
+GIFT_PREP_DAYS = int(os.getenv("GIFT_PREP_DAYS", 3))
