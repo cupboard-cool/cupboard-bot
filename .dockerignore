@@ -1,7 +1,8 @@
-__pycache__
-.venv
-.vscode
 .idea
+.vscode
+
+.venv
+__pycache__
 
 .git
 .gitignore
@@ -11,5 +12,6 @@ docker-compose*
 compose.y*ml
 Dockerfile*
 
+*.env
+data
 LICENSE
-test_birthdays.json
