@@ -5,7 +5,7 @@ load_dotenv()
 
 env = os.getenv("APP_ENV", "development")
 
-env_file = f".env.{env}"
+env_file = f"{env}.env"
 if os.path.exists(env_file):
     load_dotenv(env_file)
 
