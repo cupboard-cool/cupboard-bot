@@ -1,12 +1,13 @@
 import json
 from datetime import datetime, UTC, date
+from typing import NoReturn
 
 from telebot import TeleBot
 
 from config import MAIN_CHAT_ID, GIFT_CHAT_ID, GIFT_PREP_DAYS, BIRTHDAYS_DATA_FILE
 
 
-def check_birthday(bot: TeleBot) -> None:
+def check_birthday(bot: TeleBot) -> NoReturn:
     today = datetime.now(UTC).date()
 
     with open(BIRTHDAYS_DATA_FILE) as file:
@@ -26,8 +27,8 @@ def check_birthday(bot: TeleBot) -> None:
             ban(bot, uid, -delta.days, years)
 
 
-def congratulate(bot: TeleBot, id: int, years: int) -> None:
-    mention = get_mention(bot, id)
+def congratulate(bot: TeleBot, user_id: int, years: int) -> NoReturn:
+    mention = get_mention(bot, user_id)
 
     gift_chat_message = f"У {mention} сегодня день рождения, не забудьте отправить подарки!"
     bot.send_message(GIFT_CHAT_ID, gift_chat_message, "HTML")
@@ -42,38 +43,39 @@ def congratulate(bot: TeleBot, id: int, years: int) -> None:
     bot.send_message(MAIN_CHAT_ID, main_chat_message1)
 
 
-def ban(bot: TeleBot, id: int, prep_days: int, years: int) -> None:
-    if bot.get_chat_member(GIFT_CHAT_ID, id).status == "kicked":
+def ban(bot: TeleBot, user_id: int, prep_days: int, years: int) -> NoReturn:
+    if bot.get_chat_member(GIFT_CHAT_ID, user_id).status == "kicked":
         return
     
-    banned_successfully = bot.ban_chat_member(GIFT_CHAT_ID, id)
+    banned_successfully = bot.ban_chat_member(GIFT_CHAT_ID, user_id)
 
     if banned_successfully:
-        mention = get_mention(bot, id)
-        message = f"Через {prep_days} дня у {mention} день рождения ({years} лет), поэтому я ЗАБАНИЛ его, чтобы вы смогли в тайне подготовить подарок. Удачи! :)"
+        mention = get_mention(bot, user_id)
+        message = (f"Через {prep_days} дня у {mention} день рождения ({years} лет), поэтому я ЗАБАНИЛ его, чтобы вы "
+                   f"смогли в тайне подготовить подарок. Удачи! :)")
         bot.send_message(GIFT_CHAT_ID, message, "HTML")
 
 
-def unban(bot: TeleBot, id: int) -> None:
-    if bot.get_chat_member(GIFT_CHAT_ID, id).status != "kicked":
+def unban(bot: TeleBot, user_id: int) -> NoReturn:
+    if bot.get_chat_member(GIFT_CHAT_ID, user_id).status != "kicked":
         return
     
-    unbanned_successfully = bot.unban_chat_member(GIFT_CHAT_ID, id)
+    unbanned_successfully = bot.unban_chat_member(GIFT_CHAT_ID, user_id)
 
     if unbanned_successfully:
-        mention = get_mention(bot, id)
+        mention = get_mention(bot, user_id)
         message = f"{mention} отметил день рождения и теперь разбанен."
         bot.send_message(GIFT_CHAT_ID, message, "HTML")
 
 
-def get_mention(bot: TeleBot, id: int) -> str:
-    chat_info = bot.get_chat(id)
+def get_mention(bot: TeleBot, user_id: int) -> str:
+    chat_info = bot.get_chat(user_id)
 
     username = chat_info.username
 
     if username is not None:
         mention = f"@{username}"
     else:
-        mention = f"<a href=\"tg://user?id={id}\">{chat_info.first_name}</a>"
+        mention = f"<a href=\"tg://user?id={user_id}\">{chat_info.first_name}</a>"
 
     return mention

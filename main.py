@@ -24,7 +24,7 @@ except ValueError:
     sys.exit()
 
 
-def schedule_run_continuously(interval=60):
+def schedule_run_continuously(interval=60) -> threading.Event:
     cease_continuous_run = threading.Event()
 
     class ScheduleThread(threading.Thread):
