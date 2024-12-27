@@ -1,7 +1,6 @@
 import time
 import threading
 import sys
-import json
 from typing import NoReturn
 from random import choice
 from difflib import get_close_matches
@@ -15,7 +14,7 @@ from kaomoji.kaomoji import Kaomoji
 import messages
 import functions
 import birthday
-from config import BOT_TOKEN, FOLLOWERS_DATA_FILE
+from config import BOT_TOKEN
 
 try:
     bot = TeleBot(token=BOT_TOKEN, use_class_middlewares=True)
@@ -61,20 +60,6 @@ class Middleware(BaseMiddleware):
 bot.setup_middleware(Middleware())
 
 kao = Kaomoji()
-
-
-def notify_followers(message: str) -> NoReturn:
-    try:
-        with open(FOLLOWERS_DATA_FILE) as followers_data:
-            followers = json.load(followers_data)['followers']
-    except FileNotFoundError:
-        followers = []
-
-    if len(followers) == 0:
-        print('No followers')
-    else:
-        for follower in followers:
-            bot.send_message(follower['chat_id'], message)
 
 
 @bot.message_handler(commands=['try'])

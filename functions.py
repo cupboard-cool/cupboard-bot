@@ -1,6 +1,6 @@
 import json
 from difflib import get_close_matches
-from typing import Optional
+from typing import Optional, NoReturn
 from random import getrandbits
 
 import telebot
@@ -76,6 +76,23 @@ def get_mention(bot: telebot.TeleBot, user_id: int) -> Optional[str]:
         return mention
     except telebot.apihelper.ApiTelegramException:
         return None
+
+
+def notify_followers(bot: telebot.TeleBot, message: str) -> NoReturn:
+    followers = []
+
+    try:
+        with open(FOLLOWERS_DATA_FILE, 'r') as followers_data:
+            followers = json.load(followers_data)['followers']
+    except FileNotFoundError:
+        with open(FOLLOWERS_DATA_FILE, 'x') as followers_data:
+            json.dump({'followers': followers}, followers_data)
+
+    if followers:
+        for follower in followers:
+            bot.send_message(follower['chat_id'], message)
+    else:
+        print('No followers')
 
 
 def include_name_trigger(message: telebot.types.Message) -> bool:
