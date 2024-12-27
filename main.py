@@ -81,7 +81,7 @@ def try_command(message: telebot.types.Message) -> NoReturn:
     bot.reply_to(message, text)
 
 
-@bot.message_handler(commands=['follow'])
+@bot.message_handler(commands=['follow'], chat_types=['private'])
 def follow_command(message: telebot.types.Message) -> NoReturn:
     user_id = str(message.from_user.id)
     response = functions.follow_notifications(user_id)
@@ -89,7 +89,7 @@ def follow_command(message: telebot.types.Message) -> NoReturn:
     bot.send_message(user_id, response)
 
 
-@bot.message_handler(commands=['unfollow'])
+@bot.message_handler(commands=['unfollow'], chat_types=['private'])
 def unfollow_command(message: telebot.types.Message) -> NoReturn:
     user_id = str(message.from_user.id)
     response = functions.unfollow_notifications(user_id)
