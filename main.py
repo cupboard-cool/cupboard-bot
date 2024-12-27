@@ -112,18 +112,23 @@ def unfollow_command(message: telebot.types.Message) -> NoReturn:
     bot.send_message(user_id, response)
 
 
-@bot.message_handler(func=lambda message: True)
-def any_message(message: telebot.types.Message) -> NoReturn:
-    username = message.from_user.username if message.from_user.username else 'unknown'
-    message_text = message.text
-    message_words = message_text.split(' ')
-    chat_type = message.chat.type
+@bot.message_handler(func=lambda message: functions.include_name_trigger(message), content_types=['text'],
+                     chat_types=['group', 'supergroup'])
+@bot.message_handler(content_types=['text'], chat_types=['private'])
+def any_message_handler(message: telebot.types.Message) -> NoReturn:
     chat_id = message.chat.id
+    mention = functions.get_mention(bot, chat_id)
+    username = mention if mention is not None else 'unknown'
+    message_text = message.text
+
+    answer_message_text = None
 
     for trigger_message_dictionary in messages.trigger_message_dictionaries_list:
-        trigger_matches = [trigger_message_array_obj for trigger_message_array_obj in
-                           trigger_message_dictionary['trigger_message_array'] if
-                           trigger_message_array_obj in message_text.lower()]
+        trigger_matches = [
+            trigger_message_array_obj for trigger_message_array_obj in
+            trigger_message_dictionary['trigger_message_array'] if
+            trigger_message_array_obj in message_text.lower()
+        ]
 
         close_trigger_matches = get_close_matches(
             word=message_text.lower(),
@@ -133,25 +138,15 @@ def any_message(message: telebot.types.Message) -> NoReturn:
         )
 
         if trigger_matches or close_trigger_matches:
-            if chat_type == 'private':
-                bot.send_message(chat_id, choice(trigger_message_dictionary['response_message_array']).format(username))
-                break
-            else:
-                name_trigger_matches = [name_trigger for name_trigger in messages.name_triggers if
-                                        name_trigger in message_words]
-                close_name_trigger_matches = [get_close_matches(name_trigger, message_words) for name_trigger in
-                                              messages.name_triggers if get_close_matches(name_trigger, message_words)]
-
-                if name_trigger_matches or close_name_trigger_matches:
-                    bot.send_message(chat_id,
-                                     choice(trigger_message_dictionary['response_message_array']).format(username))
-                    break
+            answer_message_text = choice(trigger_message_dictionary['response_message_array']).format(username)
+            break
     else:
         for nontarget_trigger_message_dictionary in messages.nontarget_trigger_message_dictionaries_list:
             trigger_matches = [
                 {'text': trigger_message_array_obj, 'action': nontarget_trigger_message_dictionary['action']} for
                 trigger_message_array_obj in nontarget_trigger_message_dictionary['trigger_message_array'] if
-                trigger_message_array_obj in message_text.lower()]
+                trigger_message_array_obj in message_text.lower()
+            ]
 
             close_trigger_matches = get_close_matches(
                 word=message_text.lower(),
@@ -161,25 +156,18 @@ def any_message(message: telebot.types.Message) -> NoReturn:
             )
 
             if trigger_matches or close_trigger_matches:
-                if trigger_matches[0]['action'] != 'sneeze':
-                    bot.send_message(
-                        chat_id=chat_id,
-                        text=choice(nontarget_trigger_message_dictionary['response_message_array']).format(username)
-                    )
-
-                    break
-                elif get_close_matches(
+                if (trigger_matches[0]['action'] != 'sneeze') or get_close_matches(
                         word=message_text.lower(),
                         possibilities=nontarget_trigger_message_dictionary['trigger_message_array'],
                         n=1,
                         cutoff=1
                 ):
-
-                    bot.send_message(
-                        chat_id,
-                        choice(nontarget_trigger_message_dictionary['response_message_array']).format(username))
-
+                    answer_message_text = choice(nontarget_trigger_message_dictionary['response_message_array']).format(
+                        username)
                     break
+
+    if answer_message_text is not None:
+        bot.send_message(chat_id, answer_message_text)
 
 
 def main() -> NoReturn:

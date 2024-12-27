@@ -5,6 +5,7 @@ from typing import NoReturn
 from telebot import TeleBot
 
 from config import MAIN_CHAT_ID, GIFT_CHAT_ID, GIFT_PREP_DAYS, BIRTHDAYS_DATA_FILE
+from functions import get_mention
 
 
 def check_birthday(bot: TeleBot) -> NoReturn:
@@ -66,16 +67,3 @@ def unban(bot: TeleBot, user_id: int) -> NoReturn:
         mention = get_mention(bot, user_id)
         message = f"{mention} отметил день рождения и теперь разбанен."
         bot.send_message(GIFT_CHAT_ID, message, "HTML")
-
-
-def get_mention(bot: TeleBot, user_id: int) -> str:
-    chat_info = bot.get_chat(user_id)
-
-    username = chat_info.username
-
-    if username is not None:
-        mention = f"@{username}"
-    else:
-        mention = f"<a href=\"tg://user?id={user_id}\">{chat_info.first_name}</a>"
-
-    return mention
