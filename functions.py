@@ -103,5 +103,4 @@ def include_name_trigger(message: telebot.types.Message) -> bool:
     close_name_trigger_matches = [get_close_matches(name_trigger, message_words) for name_trigger in
                                   messages.name_triggers if get_close_matches(name_trigger, message_words)]
 
-    print(bool(name_trigger_matches) or bool(close_name_trigger_matches))
     return bool(name_trigger_matches) or bool(close_name_trigger_matches)
