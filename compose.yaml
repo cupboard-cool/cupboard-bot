@@ -1,6 +1,8 @@
 services:
   bot:
-    image: cupboard-bot
+    build:
+      context: .
+      target: run
     environment:
       BOT_TOKEN: ""
       MAIN_CHAT_ID: ""
