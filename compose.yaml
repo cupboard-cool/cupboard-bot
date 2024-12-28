@@ -3,9 +3,6 @@ services:
     build:
       context: .
       target: run
-    environment:
-      BOT_TOKEN: ""
-      MAIN_CHAT_ID: ""
-      GIFT_CHAT_ID: ""
+    env_file: "development.env"
     volumes:
       - ./data:/data
