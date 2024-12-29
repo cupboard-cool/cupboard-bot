@@ -11,6 +11,7 @@ from telebot import TeleBot, BaseMiddleware
 from schedule import every, repeat
 from kaomoji.kaomoji import Kaomoji
 
+import new_year
 import messages
 import functions
 import birthday
@@ -41,6 +42,7 @@ def schedule_run_continuously(interval=60) -> threading.Event:
 @repeat(every().day.at("06:00", "utc"))
 def process_day() -> NoReturn:
     birthday.check_birthday(bot)
+    new_year.check_new_year(bot)
 
 
 class Middleware(BaseMiddleware):
