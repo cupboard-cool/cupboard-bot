@@ -1,0 +1,8 @@
+services:
+  bot:
+    build:
+      context: .
+      target: run
+    env_file: "development.env"
+    volumes:
+      - ./data:/data
