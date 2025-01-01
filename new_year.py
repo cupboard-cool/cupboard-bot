@@ -26,6 +26,9 @@ def congratulate(bot: TeleBot, user_ids: list[int]):
         mention = get_mention(bot, uid)
         if mention is not None:
             mentions.append(mention)
+
+    if not mentions:
+        return schedule.CancelJob
     
     message0 = f"С НОВЫМ ГОДОМ, {", ".join(mentions)}!"
     message1 = "\U0001F389"
